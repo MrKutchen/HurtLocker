@@ -1,31 +1,18 @@
-import com.sun.xml.internal.bind.v2.TODO;
-
-import javax.management.AttributeNotFoundException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Parser {
-    private List<ShoppingItem> shoppingList;
-    private Map<String, Integer> numOfPrices;
-    private Integer numOfErrors = 0;
+    private final ArrayList<ShoppingItem> shoppingList = new ArrayList<>();
+    private int errors = 0;
 
 
-    public Parser() {
-        shoppingList = new ArrayList<>();
-        numOfPrices = new LinkedHashMap<>();
+    public String[] splitRawData(String string) {
+        return string.split("([;:^@%*!])");
     }
 
-    public String[] splitRawData(String data) {
-        Pattern pattern = Pattern.compile("##");
-        String[] splitData = pattern.split(data);
-        return splitData;
-    }
-
-    public String formattedShoppingItem(String data) throws IllegalArgumentException {
+    public String formattedShoppingItem(String data) {
         if (Pattern.matches("[Mm][Ii][Ll][Kk]", data))
             return "Milk";
         else if (Pattern.matches("[Bb][Rr][Ee][Aa][Dd]", data))
@@ -34,22 +21,22 @@ public class Parser {
             return "Cookies";
         else if (Pattern.matches("[Aa][Pp][Pp][Ll][Ee][Ss]", data))
             return "Apples";
-        else
-            throw new IllegalArgumentException();
+        else {
+            return data;
+        }
     }
 
-    public String splitOnFieldsAndFind(String data, int index) throws AttributeNotFoundException {
+    public String splitOnFieldsAndFind(String string, int index) {
+        Pattern fieldName = Pattern.compile("([\\w\\d.]+)");
         try {
-            Pattern pattern = Pattern.compile("[\\w\\d.]+");
-            Matcher matcher = pattern.matcher(splitRawData(data)[index]);
+            Matcher matcher = fieldName.matcher((splitRawData(string)[index]));
             if (matcher.find()) {
                 return formattedShoppingItem(matcher.group());
             } else {
-                numOfErrors++;
-                throw new AttributeNotFoundException();
+                errors++;
+                throw new IllegalArgumentException();
             }
-        } catch (AttributeNotFoundException e) {
-            System.err.println("Error" + e);
+        } catch (IllegalArgumentException e) {
             return "Error";
         }
     }
@@ -58,14 +45,57 @@ public class Parser {
         shoppingList.add(new ShoppingItem(name, price, type, date));
     }
 
-    public void createShoppingItems(String data) throws AttributeNotFoundException {
-        String[] items = data.split("##");
-        for (String item : items) {
-            addShoppingItem(splitOnFieldsAndFind(item, 1), splitOnFieldsAndFind(item, 3), splitOnFieldsAndFind(item, 5), splitOnFieldsAndFind(item, 7));
+    public void createShoppingItem(String input) {
+        String[] itemArray = input.split("##");
+        for (String s : itemArray) {
+            addShoppingItem(splitOnFieldsAndFind(s, 1), splitOnFieldsAndFind(s, 3), splitOnFieldsAndFind(s, 5), splitOnFieldsAndFind(s, 7));
         }
     }
 
-    //TODO Build method to obtain numbers of each shopping item
-    //TODO Create method to print shopping list items for each item
-    //TODO Unit testing
+    public String numOfShoppingItemsAndPriceInRawData(String string) {
+        StringBuilder items = new StringBuilder();
+        LinkedHashMap<String, Integer> priceCounter = new LinkedHashMap<>();
+        int stringCount = 0;
+        for (ShoppingItem item : shoppingList) {
+            if (item.getName().equals(string)) {
+                stringCount++;
+                if (priceCounter.containsKey(item.getPrice())) {
+                    priceCounter.put(item.getPrice(), priceCounter.get(item.getPrice()) + 1);
+                } else if (item.getPrice().equals("Error")) {
+                    stringCount--;
+                } else {
+                    priceCounter.put(item.getPrice(), 1);
+                }
+            }
+        }
+        return getOutput(string, items, priceCounter, stringCount);
+    }
+
+    private String getOutput(String string, StringBuilder items, LinkedHashMap<String, Integer> priceCounter, int stringCount) {
+        items.append("name:\t").append(string).append("\t\t").append("seen: ").append(stringCount).append(" times\n");
+        items.append("=============\t\t=============\n");
+        int counter = 0;
+        for (String key : priceCounter.keySet()) {
+            items.append("Price:\t").append(key).append("\t\t").append("seen: ").append(priceCounter.get(key)).append(" times");
+            if (counter == 0) {
+                items.append("\n-------------\t\t-------------\n");
+            }
+            counter++;
+        }
+
+        return items.toString();
+    }
+
+    public String output() {
+        return numOfShoppingItemsAndPriceInRawData("Milk") +
+                "\n\n" +
+                numOfShoppingItemsAndPriceInRawData("Bread") +
+                "\n" +
+                numOfShoppingItemsAndPriceInRawData("Cookies") +
+                "\n" +
+                numOfShoppingItemsAndPriceInRawData("Apples") +
+                "\n\n" +
+                "Errors\t\t\t\tseen: " + errors + " times";
+    }
+
 }
