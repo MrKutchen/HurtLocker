@@ -8,8 +8,8 @@ public class Parser {
     private int errors = 0;
 
 
-    public String[] splitRawData(String string) {
-        return string.split("([;:^@%*!])");
+    public String[] splitRawData(String data) {
+        return data.split("([;:^@%*!])");
     }
 
     public String formattedShoppingItem(String data) {
@@ -26,10 +26,10 @@ public class Parser {
         }
     }
 
-    public String splitOnFieldsAndFind(String string, int index) {
+    public String splitOnFieldsAndFind(String data, int index) {
         Pattern fieldName = Pattern.compile("([\\w\\d.]+)");
         try {
-            Matcher matcher = fieldName.matcher((splitRawData(string)[index]));
+            Matcher matcher = fieldName.matcher((splitRawData(data)[index]));
             if (matcher.find()) {
                 return formattedShoppingItem(matcher.group());
             } else {
@@ -41,59 +41,57 @@ public class Parser {
         }
     }
 
-    public void addShoppingItem(String name, String price, String type, String date) {
-        shoppingList.add(new ShoppingItem(name, price, type, date));
+    public void addShoppingItem(String name, String price) {
+        shoppingList.add(new ShoppingItem(name, price));
     }
 
-    public void createShoppingItem(String input) {
-        String[] itemArray = input.split("##");
+    public void createShoppingItems(String data) {
+        String[] itemArray = data.split("##");
         for (String s : itemArray) {
-            addShoppingItem(splitOnFieldsAndFind(s, 1), splitOnFieldsAndFind(s, 3), splitOnFieldsAndFind(s, 5), splitOnFieldsAndFind(s, 7));
+            addShoppingItem(splitOnFieldsAndFind(s, 1), splitOnFieldsAndFind(s, 3));
         }
     }
 
-    public String numOfShoppingItemsAndPriceInRawData(String string) {
-        StringBuilder items = new StringBuilder();
-        LinkedHashMap<String, Integer> priceCounter = new LinkedHashMap<>();
-        int stringCount = 0;
+    public String shoppingItemsAndNumOfPricesInRawData(String name) {
+        LinkedHashMap<String, Integer> numOfPriceValues = new LinkedHashMap<>();
+        int count = 0;
         for (ShoppingItem item : shoppingList) {
-            if (item.getName().equals(string)) {
-                stringCount++;
-                if (priceCounter.containsKey(item.getPrice())) {
-                    priceCounter.put(item.getPrice(), priceCounter.get(item.getPrice()) + 1);
-                } else if (item.getPrice().equals("Error")) {
-                    stringCount--;
+            if (item.getName().equals(name) && !item.getPrice().equals("Error")) {
+                if (numOfPriceValues.containsKey(item.getPrice())) {
+                    numOfPriceValues.put(item.getPrice(), numOfPriceValues.get(item.getPrice()) + 1);
+                    count++;
                 } else {
-                    priceCounter.put(item.getPrice(), 1);
+                    numOfPriceValues.put(item.getPrice(), 1);
                 }
             }
         }
-        return getOutput(string, items, priceCounter, stringCount);
+        return getOutput(name, numOfPriceValues, count);
     }
 
-    private String getOutput(String string, StringBuilder items, LinkedHashMap<String, Integer> priceCounter, int stringCount) {
-        items.append("name:\t").append(string).append("\t\t").append("seen: ").append(stringCount).append(" times\n");
-        items.append("=============\t\t=============\n");
+    public String getOutput(String name, LinkedHashMap<String, Integer> numOfPriceValues, int count) {
+        StringBuilder output = new StringBuilder();
+        output.append("name:\t").append(name).append("\t\t").append("seen: ").append(count).append(" times\n");
+        output.append("=============\t\t=============\n");
         int counter = 0;
-        for (String key : priceCounter.keySet()) {
-            items.append("Price:\t").append(key).append("\t\t").append("seen: ").append(priceCounter.get(key)).append(" times");
+        for (String key : numOfPriceValues.keySet()) {
+            output.append("Price:\t").append(key).append("\t\t").append("seen: ").append(numOfPriceValues.get(key)).append(" times");
             if (counter == 0) {
-                items.append("\n-------------\t\t-------------\n");
+                output.append("\n-------------\t\t-------------\n");
             }
             counter++;
         }
 
-        return items.toString();
+        return output.toString();
     }
 
     public String output() {
-        return numOfShoppingItemsAndPriceInRawData("Milk") +
+        return shoppingItemsAndNumOfPricesInRawData("Milk") +
                 "\n\n" +
-                numOfShoppingItemsAndPriceInRawData("Bread") +
+                shoppingItemsAndNumOfPricesInRawData("Bread") +
                 "\n" +
-                numOfShoppingItemsAndPriceInRawData("Cookies") +
+                shoppingItemsAndNumOfPricesInRawData("Cookies") +
                 "\n" +
-                numOfShoppingItemsAndPriceInRawData("Apples") +
+                shoppingItemsAndNumOfPricesInRawData("Apples") +
                 "\n\n" +
                 "Errors\t\t\t\tseen: " + errors + " times";
     }

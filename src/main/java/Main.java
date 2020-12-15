@@ -9,9 +9,9 @@ public class Main {
     }
 
     public static void main(String[] args) throws Exception{
-        String input = (new Main()).readRawDataToString();
+        String data = (new Main()).readRawDataToString();
         Parser parser = new Parser();
-        parser.createShoppingItem(input);
+        parser.createShoppingItems(data);
         System.out.println(parser.output());
     }
 }

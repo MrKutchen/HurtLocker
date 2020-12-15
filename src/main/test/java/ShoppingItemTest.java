@@ -2,7 +2,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 public class ShoppingItemTest {
-    ShoppingItem shoppingItem = new ShoppingItem("Apples", "0.25", "Food", "08/24/20");
+    ShoppingItem shoppingItem = new ShoppingItem("Apples", "0.25");
 
     @Test
     public void getName() {
@@ -24,23 +24,4 @@ public class ShoppingItemTest {
         Assert.assertEquals(expected, actual);
     }
 
-    @Test
-    public void getType() {
-        //Given
-        String expected = "Food";
-        //When
-        String actual = shoppingItem.getType();
-        //Then
-        Assert.assertEquals(expected, actual);
-    }
-
-    @Test
-    public void getExpirationDate() {
-        //Given
-        String expected = "08/24/20";
-        //When
-        String actual = shoppingItem.getExpiration();
-        //Then
-        Assert.assertEquals(expected, actual);
-    }
 }
