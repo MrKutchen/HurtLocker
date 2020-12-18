@@ -5,7 +5,7 @@ public class ShoppingItemTest {
     ShoppingItem shoppingItem = new ShoppingItem("Apples", "0.25");
 
     @Test
-    public void getName() {
+    public void getNameTest() {
         //Given
         String expected = "Apples";
         //When
@@ -15,7 +15,7 @@ public class ShoppingItemTest {
     }
 
     @Test
-    public void getPrice() {
+    public void getPriceTest() {
         //Given
         String expected = "0.25";
         //When

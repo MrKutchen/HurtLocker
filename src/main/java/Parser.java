@@ -12,17 +12,17 @@ public class Parser {
         return data.split("([;:^@%*!])");
     }
 
-    public String formattedShoppingItem(String data) {
-        if (Pattern.matches("[Mm][Ii][Ll][Kk]", data))
+    public String formattedShoppingItem(String name) {
+        if (Pattern.matches("[Mm][Ii][Ll][Kk]", name))
             return "Milk";
-        else if (Pattern.matches("[Bb][Rr][Ee][Aa][Dd]", data))
+        else if (Pattern.matches("[Bb][Rr][Ee][Aa][Dd]", name))
             return "Bread";
-        else if (Pattern.matches("[Cc][0Oo][0Oo][Kk][Ii][Ee][Ss]", data))
+        else if (Pattern.matches("[Cc][0Oo][0Oo][Kk][Ii][Ee][Ss]", name))
             return "Cookies";
-        else if (Pattern.matches("[Aa][Pp][Pp][Ll][Ee][Ss]", data))
+        else if (Pattern.matches("[Aa][Pp][Pp][Ll][Ee][Ss]", name))
             return "Apples";
         else {
-            return data;
+            return name;
         }
     }
 
@@ -57,9 +57,9 @@ public class Parser {
         int count = 0;
         for (ShoppingItem item : shoppingList) {
             if (item.getName().equals(name) && !item.getPrice().equals("Error")) {
+                count++;
                 if (numOfPriceValues.containsKey(item.getPrice())) {
                     numOfPriceValues.put(item.getPrice(), numOfPriceValues.get(item.getPrice()) + 1);
-                    count++;
                 } else {
                     numOfPriceValues.put(item.getPrice(), 1);
                 }
@@ -96,4 +96,7 @@ public class Parser {
                 "Errors\t\t\t\tseen: " + errors + " times";
     }
 
+    public ArrayList<ShoppingItem> getShoppingList() {
+        return shoppingList;
+    }
 }
